@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Poyga: Start Server",
+      "type": "shell",
+      "command": "php -S 0.0.0.0:8080 -t ${workspaceFolder}",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "php",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[",
+          "endsPattern": "Development Server \\(http://"
+        }
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "group": "poyga"
+      }
+    },
+    {
+      "label": "Poyga: Open Preview",
+      "type": "vscode",
+      "command": "simpleBrowser.show",
+      "args": ["http://localhost:8080/"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Poyga: Preview (server + browser)",
+      "dependsOn": ["Poyga: Start Server", "Poyga: Open Preview"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    }
+  ]
+}
