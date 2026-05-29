@@ -17,6 +17,9 @@
         results:   $("#results"),
         meName:    $("#me-name"),
         copyLink:  $("#copy-link"),
+        lbList:    $("#lb-list"),
+        lbCount:   $("#lb-count"),
+        lbEmpty:   $("#lb-empty"),
     };
 
     /** @type {object|null} */
@@ -85,6 +88,7 @@
         state = s;
         renderStatus();
         renderTrack();
+        renderLeaderboard();
         renderControls();
         renderOverlay();
         renderResults();
@@ -234,6 +238,65 @@
     }
     function hideOverlay() {
         ui.overlay.hidden = true;
+    }
+
+    function renderLeaderboard() {
+        const list = ui.lbList;
+        const players = state.players || [];
+        ui.lbCount.textContent = players.length;
+        ui.lbEmpty.hidden = players.length > 0;
+
+        // Sort: finished (by place asc), then by position desc, then by name
+        const sorted = [...players].sort((a, b) => {
+            if (a.finished_at && b.finished_at) return a.place - b.place;
+            if (a.finished_at) return -1;
+            if (b.finished_at) return 1;
+            if (b.position !== a.position) return b.position - a.position;
+            return a.name.localeCompare(b.name);
+        });
+
+        const tl = state.track_length || 100;
+        const existing = new Map();
+        $$(".lb-item", list).forEach(el => existing.set(el.dataset.id, el));
+
+        const frag = document.createDocumentFragment();
+        sorted.forEach((p, idx) => {
+            const id = String(p.id);
+            let el = existing.get(id);
+            existing.delete(id);
+            if (!el) {
+                el = document.createElement("li");
+                el.className = "lb-item";
+                el.dataset.id = id;
+                el.innerHTML = `
+                    <span class="lb-bar"></span>
+                    <span class="lb-rank"></span>
+                    <span class="lb-dot"></span>
+                    <span class="lb-name"></span>
+                    <span class="lb-pct"></span>
+                `;
+            }
+            const isMe = p.id === ME_ID;
+            el.classList.toggle("me", isMe);
+            el.classList.toggle("finished", !!p.finished_at);
+            el.classList.toggle("offline", !p.online && !p.finished_at);
+            el.style.setProperty("--c", p.color);
+
+            const pct = Math.round((p.position / tl) * 100);
+            el.style.setProperty("--pct", pct + "%");
+
+            const rankLabel = p.finished_at
+                ? (p.place === 1 ? "🥇" : p.place === 2 ? "🥈" : p.place === 3 ? "🥉" : "#" + p.place)
+                : "#" + (idx + 1);
+            $(".lb-rank", el).textContent = rankLabel;
+            $(".lb-name", el).innerHTML = escapeHTML(p.name) + (isMe ? '<span class="me-tag">Siz</span>' : "");
+            $(".lb-pct",  el).textContent = pct + "%";
+
+            frag.appendChild(el);
+        });
+        // Drop removed items
+        existing.forEach(el => el.remove());
+        list.appendChild(frag);
     }
 
     function renderResults() {

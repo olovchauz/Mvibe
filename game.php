@@ -22,35 +22,46 @@ $room = isset($_GET['room']) ? strtoupper(preg_replace('/[^A-Z0-9]/', '', (strin
 </header>
 
 <main id="game" class="game">
-    <div id="track-wrap" class="track-wrap">
-        <div class="finish-line" aria-hidden="true">FINISH</div>
-        <div id="track" class="track"></div>
+    <div class="game-layout">
+        <section class="game-main">
+            <div id="track-wrap" class="track-wrap">
+                <div class="finish-line" aria-hidden="true">FINISH</div>
+                <div id="track" class="track"></div>
+            </div>
+
+            <div id="controls" class="controls">
+                <button id="btn-left" class="pad-btn left" type="button" aria-label="Chap">◀</button>
+                <button id="btn-ready" class="btn primary big" type="button">Tayyorman ✋</button>
+                <button id="btn-right" class="pad-btn right" type="button" aria-label="O'ng">▶</button>
+            </div>
+
+            <p class="help">
+                ⌨️ <b>← →</b> yoki <b>A D</b> — navbatma-navbat tez bosing.
+                Mobil — ekrandagi tugmalardan foydalaning.
+            </p>
+
+            <div id="results" class="results" hidden></div>
+        </section>
+
+        <aside id="leaderboard" class="leaderboard" aria-label="Tartib jadvali">
+            <div class="lb-head">
+                <h3>🏁 Tartib</h3>
+                <span id="lb-count" class="lb-count">0</span>
+            </div>
+            <ol id="lb-list" class="lb-list"></ol>
+            <div id="lb-empty" class="lb-empty">O'yinchi yo'q...</div>
+        </aside>
     </div>
 
     <div id="overlay" class="overlay" hidden>
         <div id="overlay-content" class="overlay-content"></div>
     </div>
-
-    <div id="controls" class="controls">
-        <button id="btn-left" class="pad-btn left" type="button" aria-label="Chap">◀</button>
-        <button id="btn-ready" class="btn primary big" type="button">Tayyorman ✋</button>
-        <button id="btn-right" class="pad-btn right" type="button" aria-label="O'ng">▶</button>
-    </div>
-
-    <p class="help">
-        ⌨️ <b>← →</b> yoki <b>A D</b> — navbatma-navbat tez bosing.
-        Mobil — ekrandagi tugmalardan foydalaning.
-    </p>
-
-    <div id="results" class="results" hidden></div>
 </main>
 
 <footer class="footer">quvnoq.biz · poyga · siz: <b id="me-name">—</b></footer>
 
 <script>
-const ROOM  = <?= json_encode($room) ?>;
-let TOKEN = localStorage.getItem('poyga_token');
-let ME_ID = parseInt(localStorage.getItem('poyga_player_id') || '0', 10);
+const ROOM = <?= json_encode($room) ?>;
 
 // Allow URL-based session bootstrap: ?t=TOKEN&pid=ID
 const _qp = new URLSearchParams(location.search);
@@ -60,9 +71,11 @@ if (_qp.get('t') && _qp.get('pid')) {
     localStorage.setItem('poyga_room', ROOM);
     history.replaceState({}, '', location.pathname + '?room=' + encodeURIComponent(ROOM));
 }
-const TOKEN2 = localStorage.getItem('poyga_token');
-const PID2   = parseInt(localStorage.getItem('poyga_player_id') || '0', 10);
-if (!TOKEN2 || localStorage.getItem('poyga_room') !== ROOM) {
+
+const TOKEN = localStorage.getItem('poyga_token');
+const ME_ID = parseInt(localStorage.getItem('poyga_player_id') || '0', 10);
+
+if (!TOKEN || localStorage.getItem('poyga_room') !== ROOM) {
     location.href = 'index.php?room=' + encodeURIComponent(ROOM);
 }
 </script>
